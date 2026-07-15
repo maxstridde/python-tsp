@@ -161,11 +161,10 @@ Here are the detailed steps that should be followed before making a pull request
 
   # Ruff formatter and linter to be conformant with PEP8
   uv run ruff format .
-  uv run ruff check . --select=E9,F63,F7,F82 --ignore=E203,W503
-  uv run ruff check . --exit-zero --max-complexity=10
+  uv run ruff check .
 
   # Mypy for proper type hints
-  poetry run mypy --ignore-missing-imports .
+  uv run mypy --ignore-missing-imports .
 
 You can also run all of these steps at once with the check-up bash script:
 
@@ -178,7 +177,7 @@ Finally (and of course), make sure all tests pass and you get at least 95% of co
 
 .. code:: bash
 
-  poetry run pytest --cov=. --cov-report=term-missing --cov-fail-under=95 tests/
+  uv run pytest --cov=. --cov-report=term-missing --cov-fail-under=95 tests/
 
 
 Python version support
