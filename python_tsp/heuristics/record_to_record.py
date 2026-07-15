@@ -1,10 +1,10 @@
 from random import randint
-from typing import List, Optional, TextIO
+from typing import Optional, TextIO
 
 import numpy as np
 
 from python_tsp.heuristics import solve_tsp_lin_kernighan
-from python_tsp.utils import setup_initial_solution
+from python_tsp.utils import _optional_open, setup_initial_solution
 
 
 def _print_message(
@@ -19,7 +19,7 @@ def _print_message(
 
 def solve_tsp_record_to_record(
     distance_matrix: np.ndarray,
-    x0: Optional[List[int]] = None,
+    x0: Optional[list[int]] = None,
     max_iterations: Optional[int] = None,
     log_file: Optional[str] = None,
     verbose: bool = False,
@@ -62,29 +62,23 @@ def solve_tsp_record_to_record(
     max_iterations = max_iterations or n
     x, fx = setup_initial_solution(distance_matrix=distance_matrix, x0=x0)
 
-    log_file_handler = (
-        open(log_file, "w", encoding="utf-8") if log_file else None
-    )
+    with _optional_open(log_file, "w") as log_file_handler:
+        for iteration in range(1, max_iterations + 1):
+            xn = x[:]
+            for _ in range(2):
+                u = randint(1, n - 1)
+                v = randint(1, n - 1)
+                xn[u], xn[v] = xn[v], xn[u]
 
-    for iteration in range(1, max_iterations + 1):
-        xn = x[:]
-        for _ in range(2):
-            u = randint(1, n - 1)
-            v = randint(1, n - 1)
-            xn[u], xn[v] = xn[v], xn[u]
+            xn, fn = solve_tsp_lin_kernighan(
+                distance_matrix=distance_matrix, x0=xn
+            )
 
-        xn, fn = solve_tsp_lin_kernighan(
-            distance_matrix=distance_matrix, x0=xn
-        )
+            msg = f"Current value: {fx}; Iteration: {iteration}"
+            _print_message(msg, verbose, log_file_handler)
 
-        msg = f"Current value: {fx}; Iteration: {iteration}"
-        _print_message(msg, verbose, log_file_handler)
-
-        if fn < fx:
-            x = xn[:]
-            fx = fn
-
-    if log_file_handler:
-        log_file_handler.close()
+            if fn < fx:
+                x = xn[:]
+                fx = fn
 
     return x, fx

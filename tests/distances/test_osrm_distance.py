@@ -1,6 +1,7 @@
+from unittest.mock import MagicMock, patch
+
 import numpy as np
 import pytest
-from mock import patch
 from requests import Response
 from requests.exceptions import HTTPError
 
@@ -14,11 +15,13 @@ def mocked_osrm_valid_call():
     ):
         mocked_return_value = Response()
         mocked_return_value.status_code = 200
-        mocked_return_value.json = lambda: {
-            "code": "Ok",
-            "distances": np.array([[0, 50], [50, 0]]),
-            "durations": np.array([[0, 5], [5, 0]]),
-        }
+        mocked_return_value.json = MagicMock(
+            return_value={
+                "code": "Ok",
+                "distances": np.array([[0, 50], [50, 0]]),
+                "durations": np.array([[0, 5], [5, 0]]),
+            }
+        )
         mocked_get.return_value = mocked_return_value
 
         yield mocked_get

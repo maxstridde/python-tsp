@@ -5,7 +5,6 @@ considered fixtures
 
 import numpy as np
 
-
 # Symmetric distance matrix
 distance_matrix1 = np.array(
     [

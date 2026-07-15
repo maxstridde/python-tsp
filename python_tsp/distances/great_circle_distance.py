@@ -4,7 +4,6 @@ import numpy as np
 
 from .data_processing import process_input
 
-
 EARTH_RADIUS_METERS = 6371000
 
 

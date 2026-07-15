@@ -5,12 +5,12 @@ from tests.data import (
     distance_matrix1,
     distance_matrix2,
     distance_matrix3,
-    optimal_permutation1,
-    optimal_permutation2,
-    optimal_permutation3,
     optimal_distance1,
     optimal_distance2,
     optimal_distance3,
+    optimal_permutation1,
+    optimal_permutation2,
+    optimal_permutation3,
 )
 
 

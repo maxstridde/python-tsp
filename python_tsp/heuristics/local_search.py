@@ -1,28 +1,28 @@
 """Simple local search solver"""
 
 from timeit import default_timer
-from typing import List, Optional, Tuple, TextIO
+from typing import Optional, TextIO
 
 import numpy as np
 
+from python_tsp.heuristics.perturbation_schemes import neighborhood_gen
 from python_tsp.utils import (
+    _optional_open,
     compute_permutation_distance,
     setup_initial_solution,
 )
-from python_tsp.heuristics.perturbation_schemes import neighborhood_gen
-
 
 TIME_LIMIT_MSG = "WARNING: Stopping early due to time constraints"
 
 
 def solve_tsp_local_search(
     distance_matrix: np.ndarray,
-    x0: Optional[List[int]] = None,
+    x0: Optional[list[int]] = None,
     perturbation_scheme: str = "two_opt",
     max_processing_time: Optional[float] = None,
     log_file: Optional[str] = None,
     verbose: bool = False,
-) -> Tuple[List, float]:
+) -> tuple[list, float]:
     """Solve a TSP problem with a local search heuristic
 
     Parameters
@@ -69,34 +69,30 @@ def solve_tsp_local_search(
     x, fx = setup_initial_solution(distance_matrix, x0)
     max_processing_time = max_processing_time or np.inf
 
-    log_file_handler = (
-        open(log_file, "w", encoding="utf-8") if log_file else None
-    )
+    with _optional_open(log_file, "w") as log_file_handler:
+        tic = default_timer()
+        stop_early = False
+        improvement = True
 
-    tic = default_timer()
-    stop_early = False
-    improvement = True
+        while improvement and (not stop_early):
+            improvement = False
+            for n_index, xn in enumerate(
+                neighborhood_gen[perturbation_scheme](x)
+            ):
+                if default_timer() - tic > max_processing_time:
+                    _print_message(TIME_LIMIT_MSG, verbose, log_file_handler)
+                    stop_early = True
+                    break
 
-    while improvement and (not stop_early):
-        improvement = False
-        for n_index, xn in enumerate(neighborhood_gen[perturbation_scheme](x)):
-            if default_timer() - tic > max_processing_time:
-                _print_message(TIME_LIMIT_MSG, verbose, log_file_handler)
-                stop_early = True
-                break
+                fn = compute_permutation_distance(distance_matrix, xn)
 
-            fn = compute_permutation_distance(distance_matrix, xn)
+                msg = f"Current value: {fx}; Neighbor: {n_index}"
+                _print_message(msg, verbose, log_file_handler)
 
-            msg = f"Current value: {fx}; Neighbor: {n_index}"
-            _print_message(msg, verbose, log_file_handler)
-
-            if fn < fx:
-                improvement = True
-                x, fx = xn, fn
-                break  # early stop due to first improvement local search
-
-    if log_file_handler:
-        log_file_handler.close()
+                if fn < fx:
+                    improvement = True
+                    x, fx = xn, fn
+                    break  # early stop due to first improvement local search
 
     return x, fx
 

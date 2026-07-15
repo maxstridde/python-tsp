@@ -5,12 +5,12 @@ from tests.data import (
     distance_matrix1,
     distance_matrix2,
     distance_matrix3,
-    optimal_permutation1,
-    optimal_permutation2,
-    optimal_permutation3,
     optimal_distance1,
     optimal_distance2,
     optimal_distance3,
+    optimal_permutation1,
+    optimal_permutation2,
+    optimal_permutation3,
 )
 
 
@@ -22,6 +22,7 @@ def test_solution_has_all_nodes(distance_matrix):
 
     permutation, _ = solve_tsp_brute_force(distance_matrix)
 
+    assert permutation is not None
     num_nodes = distance_matrix.shape[0]
     assert len(permutation) == num_nodes
     assert set(permutation) == set(range(num_nodes))

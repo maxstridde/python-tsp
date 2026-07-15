@@ -13,11 +13,12 @@ References
 .. [2] 2-opt: https://en.wikipedia.org/wiki/2-opt
 """
 
+from collections.abc import Generator
 from random import sample
-from typing import Callable, Dict, Generator, List
+from typing import Callable
 
 
-def ps1_gen(x: List[int]) -> Generator[List[int], List[int], None]:
+def ps1_gen(x: list[int]) -> Generator[list[int], list[int], None]:
     """PS1 perturbation scheme: Swap two adjacent terms [1]
     This scheme has at most n - 1 swaps.
     """
@@ -30,7 +31,7 @@ def ps1_gen(x: List[int]) -> Generator[List[int], List[int], None]:
         yield xn
 
 
-def ps2_gen(x: List[int]) -> Generator[List[int], List[int], None]:
+def ps2_gen(x: list[int]) -> Generator[list[int], list[int], None]:
     """PS2 perturbation scheme: Swap any two elements [1]
     This scheme has n * (n - 1) / 2 swaps.
     """
@@ -45,7 +46,7 @@ def ps2_gen(x: List[int]) -> Generator[List[int], List[int], None]:
             yield xn
 
 
-def ps3_gen(x: List[int]) -> Generator[List[int], List[int], None]:
+def ps3_gen(x: list[int]) -> Generator[list[int], list[int], None]:
     """PS3 perturbation scheme: A single term is moved [1]
     This scheme has n * (n - 1) swaps.
     """
@@ -61,7 +62,7 @@ def ps3_gen(x: List[int]) -> Generator[List[int], List[int], None]:
             yield xn
 
 
-def ps4_gen(x: List[int]) -> Generator[List[int], List[int], None]:
+def ps4_gen(x: list[int]) -> Generator[list[int], list[int], None]:
     """PS4 perturbation scheme: A subsequence is moved [1]"""
 
     n = len(x)
@@ -79,7 +80,7 @@ def ps4_gen(x: List[int]) -> Generator[List[int], List[int], None]:
                 yield xn
 
 
-def ps5_gen(x: List[int]) -> Generator[List[int], List[int], None]:
+def ps5_gen(x: list[int]) -> Generator[list[int], list[int], None]:
     """PS5 perturbation scheme: A subsequence is reversed [1]"""
 
     n = len(x)
@@ -92,7 +93,7 @@ def ps5_gen(x: List[int]) -> Generator[List[int], List[int], None]:
             yield xn
 
 
-def ps6_gen(x: List[int]) -> Generator[List[int], List[int], None]:
+def ps6_gen(x: list[int]) -> Generator[list[int], list[int], None]:
     """PS6 perturbation scheme: A subsequence is reversed and moved [1]"""
 
     n = len(x)
@@ -110,7 +111,7 @@ def ps6_gen(x: List[int]) -> Generator[List[int], List[int], None]:
                 yield xn
 
 
-def two_opt_gen(x: List[int]) -> Generator[List[int], List[int], None]:
+def two_opt_gen(x: list[int]) -> Generator[list[int], list[int], None]:
     """2-opt perturbation scheme [2]"""
     n = len(x)
     i_range = range(2, n)
@@ -123,8 +124,8 @@ def two_opt_gen(x: List[int]) -> Generator[List[int], List[int], None]:
 
 
 # Mapping with all possible neighborhood generators in this module
-neighborhood_gen: Dict[
-    str, Callable[[List[int]], Generator[List[int], List[int], None]]
+neighborhood_gen: dict[
+    str, Callable[[list[int]], Generator[list[int], list[int], None]]
 ] = {
     "ps1": ps1_gen,
     "ps2": ps2_gen,

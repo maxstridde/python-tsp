@@ -12,6 +12,7 @@ Installation
 
   pip install python-tsp
   poetry add python-tsp  # if using Poetry in the project
+  uv add python-tsp  # if using `uv` in the project
 
 
 Quickstart
@@ -158,13 +159,12 @@ Here are the detailed steps that should be followed before making a pull request
 
 .. code:: bash
 
-  # Black and flake8 to be conformant with PEP8
-  poetry run black .
-  poetry run flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --ignore=E203,W503
-  poetry run flake8 . --count --exit-zero --max-complexity=10 --max-line-length=79 --statistics
+  # Ruff formatter and linter to be conformant with PEP8
+  uv run ruff format .
+  uv run ruff check .
 
-  # Mypy for proper type hints
-  poetry run mypy --ignore-missing-imports .
+  # Ty for proper type hints
+  uv run ty check .
 
 You can also run all of these steps at once with the check-up bash script:
 
@@ -177,7 +177,7 @@ Finally (and of course), make sure all tests pass and you get at least 95% of co
 
 .. code:: bash
 
-  poetry run pytest --cov=. --cov-report=term-missing --cov-fail-under=95 tests/
+  uv run pytest --cov=. --cov-report=term-missing --cov-fail-under=95 tests/
 
 
 Python version support

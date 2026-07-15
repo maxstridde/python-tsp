@@ -1,5 +1,7 @@
-import numpy as np
 from math import inf
+
+import numpy as np
+
 from python_tsp.exact.branch_and_bound import Node, PriorityQueue
 
 

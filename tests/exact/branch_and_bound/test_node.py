@@ -1,8 +1,9 @@
+from math import inf
+
 import numpy as np
 import pytest
 
 from python_tsp.exact.branch_and_bound import Node
-from math import inf
 
 
 @pytest.fixture

@@ -1,47 +1,65 @@
 [build-system]
-requires = ["poetry>=0.12"]
-build-backend = "poetry.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
-[tool.poetry]
+[project]
 name = "python_tsp"
 version = "0.5.0"
 description = "Library to solve the Traveling Salesperson Problem in pure Python."
 readme = "README_pypi.rst"
-authors = ["Fillipe Goulart <fillipe.gsm@tutanota.com>", "Luan Leonardo <>"]
+authors = [
+    {name = "Fillipe Goulart", email = "fillipe.gsm@tutanota.com"},
+    {name = "Luan Leonardo"},
+]
+license = {text = "MIT"}
+requires-python = ">=3.9"
+dependencies = [
+    "tsplib95>=0.7.1,<0.8.0",
+    "requests>=2.28.0,<3.0.0",
+    "numpy>=2.0.0,<3.0.0",
+]
+
+[project.urls]
 repository = "https://github.com/fillipe-gsm/python-tsp"
-license = "MIT"
 
-[tool.poetry.dependencies]
-python = "^3.9"
-tsplib95 = "^0.7.1"
-requests = "^2.28.0"
-numpy = "^2.0.0"
-
-[tool.poetry.group.dev.dependencies]
-mypy = "^0.991"
-types-requests = "^2.28.11.5"
-types-mock = "^4.0.15.2"
-flake8 = "^6.0.0"
-black = ">=24.4.2,<25.0"
-pytest = "^7.4.0"
-ipdb = "^0.13.13"
-pytest-cov = "^4.1.0"
-mock = "^5.1.0"
+[dependency-groups]
+dev = [
+    "types-requests>=2.28.11.5,<3.0",
+    "types-mock>=4.0.15.2,<5.0",
+    "pytest>=7.4.0,<8.0",
+    "ipdb>=0.13.13,<0.14",
+    "pytest-cov>=4.1.0,<5.0",
+    "mock>=5.1.0,<6.0",
+    "ruff>=0.15.21",
+    "ty>=0.0.59",
+]
 
 [tool.codespell]
 ignore-words-list = 'astroid,asend'
 
-[tool.black]
-line-length = 79
-
 [tool.ruff]
 line-length = 79
 fix = true
-
 include = ["*.py", "*.pyi", "**/pyproject.toml"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+docstring-code-format = true
 
 [tool.ruff.lint]
 select = [
+    # pycodestyle
+    "E",
+    # Pyflakes
+    "F",
+    # pyupgrade
+    "UP",
+    # ruff-plugin-bugbear
+    "B",
+    # ruff-plugin-simplify
+    "SIM",
+    # isort
+    "I",
     "NPY201", # numpy2-deprecation
 ]
-

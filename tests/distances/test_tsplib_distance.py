@@ -2,7 +2,6 @@ import numpy as np
 
 from python_tsp.distances import tsplib_distance_matrix
 
-
 EUC_2D_FILE = "tests/tsplib_data/a280.tsp"
 CEIL_2D_FILE = "tests/tsplib_data/dsj1000ceil.tsp"
 GEO_FILE = "tests/tsplib_data/ulysses22.tsp"

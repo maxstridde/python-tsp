@@ -1,15 +1,15 @@
 from math import inf
 from timeit import default_timer
-from typing import List, Optional, Tuple, TextIO
+from typing import Optional, TextIO
 
 import numpy as np
 
 from python_tsp.heuristics.perturbation_schemes import neighborhood_gen
 from python_tsp.utils import (
+    _optional_open,
     compute_permutation_distance,
     setup_initial_solution,
 )
-
 
 TIME_LIMIT_MSG = "WARNING: Stopping early due to time constraints"
 MAX_NON_IMPROVEMENTS = 3
@@ -18,13 +18,13 @@ MAX_INNER_ITERATIONS_MULTIPLIER = 10
 
 def solve_tsp_simulated_annealing(
     distance_matrix: np.ndarray,
-    x0: Optional[List[int]] = None,
+    x0: Optional[list[int]] = None,
     perturbation_scheme: str = "two_opt",
     alpha: float = 0.9,
     max_processing_time: Optional[float] = None,
     log_file: Optional[str] = None,
     verbose: bool = False,
-) -> Tuple[List, float]:
+) -> tuple[list, float]:
     """Solve a TSP problem using a Simulated Annealing
     The approach used here is the one proposed in [1].
 
@@ -74,49 +74,43 @@ def solve_tsp_simulated_annealing(
     x, fx = setup_initial_solution(distance_matrix, x0)
     temp = _initial_temperature(distance_matrix, x, fx, perturbation_scheme)
     max_processing_time = max_processing_time or inf
-    log_file_handler = (
-        open(log_file, "w", encoding="utf-8") if log_file else None
-    )
+    with _optional_open(log_file, "w") as log_file_handler:
+        n = len(x)
+        k_inner_min = n
+        k_inner_max = MAX_INNER_ITERATIONS_MULTIPLIER * n
+        k_noimprovements = 0  # number of inner loops without improvement
 
-    n = len(x)
-    k_inner_min = n
-    k_inner_max = MAX_INNER_ITERATIONS_MULTIPLIER * n
-    k_noimprovements = 0  # number of inner loops without improvement
+        tic = default_timer()
+        stop_early = False
+        while (k_noimprovements < MAX_NON_IMPROVEMENTS) and (not stop_early):
+            k_accepted = 0  # number of accepted perturbations
+            for k in range(k_inner_max):
+                if default_timer() - tic > max_processing_time:
+                    _print_message(TIME_LIMIT_MSG, verbose, log_file_handler)
+                    stop_early = True
+                    break
 
-    tic = default_timer()
-    stop_early = False
-    while (k_noimprovements < MAX_NON_IMPROVEMENTS) and (not stop_early):
-        k_accepted = 0  # number of accepted perturbations
-        for k in range(k_inner_max):
-            if default_timer() - tic > max_processing_time:
-                _print_message(TIME_LIMIT_MSG, verbose, log_file_handler)
-                stop_early = True
-                break
+                xn = _perturbation(x, perturbation_scheme)
+                fn = compute_permutation_distance(distance_matrix, xn)
 
-            xn = _perturbation(x, perturbation_scheme)
-            fn = compute_permutation_distance(distance_matrix, xn)
+                if _acceptance_rule(fx, fn, temp):
+                    x, fx = xn, fn
+                    k_accepted += 1
+                    k_noimprovements = 0
 
-            if _acceptance_rule(fx, fn, temp):
-                x, fx = xn, fn
-                k_accepted += 1
-                k_noimprovements = 0
+                msg = (
+                    f"Temperature {temp}. Current value: {fx} "
+                    f"k: {k + 1}/{k_inner_max} "
+                    f"k_accepted: {k_accepted}/{k_inner_min} "
+                    f"k_noimprovements: {k_noimprovements}"
+                )
+                _print_message(msg, verbose, log_file_handler)
 
-            msg = (
-                f"Temperature {temp}. Current value: {fx} "
-                f"k: {k + 1}/{k_inner_max} "
-                f"k_accepted: {k_accepted}/{k_inner_min} "
-                f"k_noimprovements: {k_noimprovements}"
-            )
-            _print_message(msg, verbose, log_file_handler)
+                if k_accepted >= k_inner_min:
+                    break
 
-            if k_accepted >= k_inner_min:
-                break
-
-        temp *= alpha  # temperature update
-        k_noimprovements += k_accepted == 0
-
-    if log_file_handler:
-        log_file_handler.close()
+            temp *= alpha  # temperature update
+            k_noimprovements += k_accepted == 0
 
     return x, fx
 
@@ -133,7 +127,7 @@ def _print_message(
 
 def _initial_temperature(
     distance_matrix: np.ndarray,
-    x: List[int],
+    x: list[int],
     fx: float,
     perturbation_scheme: str,
 ) -> float:
@@ -170,7 +164,7 @@ def _initial_temperature(
     return -dfx_mean / np.log(tau0)
 
 
-def _perturbation(x: List[int], perturbation_scheme: str):
+def _perturbation(x: list[int], perturbation_scheme: str):
     """Generate a random neighbor of a current solution ``x``
     In this case, we can use the generators created in the `local_search`
     module, and pick the first solution. Since the neighborhood is randomized,

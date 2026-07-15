@@ -1,6 +1,5 @@
 from dataclasses import dataclass, field
 from heapq import heappop, heappush
-from typing import List
 
 from python_tsp.exact.branch_and_bound import Node
 
@@ -26,7 +25,7 @@ class PriorityQueue:
         Pop the item with the highest priority from the priority queue.
     """
 
-    _container: List[Node] = field(default_factory=list)
+    _container: list[Node] = field(default_factory=list)
 
     @property
     def empty(self) -> bool:

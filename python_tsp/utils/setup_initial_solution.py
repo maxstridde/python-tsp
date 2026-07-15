@@ -1,5 +1,5 @@
 from random import sample
-from typing import List, Optional, Tuple
+from typing import Optional
 
 import numpy as np
 
@@ -7,8 +7,8 @@ from .permutation_distance import compute_permutation_distance
 
 
 def setup_initial_solution(
-    distance_matrix: np.ndarray, x0: Optional[List] = None
-) -> Tuple[List[int], float]:
+    distance_matrix: np.ndarray, x0: Optional[list] = None
+) -> tuple[list[int], float]:
     """Return initial solution and its objective value
 
     Parameters
