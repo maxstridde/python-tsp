@@ -159,8 +159,8 @@ Here are the detailed steps that should be followed before making a pull request
 
 .. code:: bash
 
-  # Black and flake8 to be conformant with PEP8
-  poetry run black .
+  # Ruff and flake8 to be conformant with PEP8
+  uv run ruff format .
   poetry run flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --ignore=E203,W503
   poetry run flake8 . --count --exit-zero --max-complexity=10 --max-line-length=79 --statistics
 

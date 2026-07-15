@@ -28,24 +28,25 @@ dev = [
     "types-requests>=2.28.11.5,<3.0",
     "types-mock>=4.0.15.2,<5.0",
     "flake8>=6.0.0,<7.0",
-    "black>=24.4.2,<25.0",
     "pytest>=7.4.0,<8.0",
     "ipdb>=0.13.13,<0.14",
     "pytest-cov>=4.1.0,<5.0",
     "mock>=5.1.0,<6.0",
+    "ruff>=0.15.21",
 ]
 
 [tool.codespell]
 ignore-words-list = 'astroid,asend'
 
-[tool.black]
-line-length = 79
-
 [tool.ruff]
 line-length = 79
 fix = true
-
 include = ["*.py", "*.pyi", "**/pyproject.toml"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+docstring-code-format = true
 
 [tool.ruff.lint]
 select = [
