@@ -159,10 +159,10 @@ Here are the detailed steps that should be followed before making a pull request
 
 .. code:: bash
 
-  # Ruff and flake8 to be conformant with PEP8
+  # Ruff formatter and linter to be conformant with PEP8
   uv run ruff format .
-  poetry run flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --ignore=E203,W503
-  poetry run flake8 . --count --exit-zero --max-complexity=10 --max-line-length=79 --statistics
+  uv run ruff check . --select=E9,F63,F7,F82 --ignore=E203,W503
+  uv run ruff check . --exit-zero --max-complexity=10
 
   # Mypy for proper type hints
   poetry run mypy --ignore-missing-imports .
