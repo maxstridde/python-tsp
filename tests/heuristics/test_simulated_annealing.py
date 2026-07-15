@@ -12,7 +12,6 @@ from tests.data import (
     distance_matrix3,
 )
 
-
 PERTURBATION_SCHEMES = neighborhood_gen.keys()
 
 

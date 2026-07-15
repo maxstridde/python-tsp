@@ -1,12 +1,12 @@
-from typing import List, Optional, TextIO, Tuple
+from typing import Optional, TextIO
 
 import numpy as np
 
 from python_tsp.exact import solve_tsp_brute_force
-from python_tsp.utils import setup_initial_solution
+from python_tsp.utils import _optional_open, setup_initial_solution
 
 
-def _cycle_to_successors(cycle: List[int]) -> List[int]:
+def _cycle_to_successors(cycle: list[int]) -> list[int]:
     """
     Convert a cycle representation to successors representation.
 
@@ -27,7 +27,7 @@ def _cycle_to_successors(cycle: List[int]) -> List[int]:
     return successors
 
 
-def _successors_to_cycle(successors: List[int]) -> List[int]:
+def _successors_to_cycle(successors: list[int]) -> list[int]:
     """
     Convert a successors representation to a cycle representation.
 
@@ -52,12 +52,12 @@ def _successors_to_cycle(successors: List[int]) -> List[int]:
 def _minimizes_hamiltonian_path_distance(
     tabu: np.ndarray,
     iteration: int,
-    successors: List[int],
-    ejected_edge: Tuple[int, int],
+    successors: list[int],
+    ejected_edge: tuple[int, int],
     distance_matrix: np.ndarray,
     hamiltonian_path_distance: float,
     hamiltonian_cycle_distance: float,
-) -> Tuple[int, int, float]:
+) -> tuple[int, int, float]:
     """
     Minimize the Hamiltonian path distance after ejecting an edge.
 
@@ -143,13 +143,10 @@ def _solve_tsp_brute_force(
     distance_matrix: np.ndarray,
     log_file: Optional[str] = None,
     verbose: bool = False,
-) -> Tuple[List[int], float]:
+) -> tuple[list[int], float]:
     x, fx = solve_tsp_brute_force(distance_matrix)
     x = x or []
 
-    log_file_handler = (
-        open(log_file, "w", encoding="utf-8") if log_file else None
-    )
     msg = (
         "Few nodes to use Lin-Kernighan heuristics, "
         "using Brute Force instead. "
@@ -158,20 +155,19 @@ def _solve_tsp_brute_force(
         msg += "No solution found."
     else:
         msg += f"Found value: {fx}"
-    _print_message(msg, verbose, log_file_handler)
 
-    if log_file_handler:
-        log_file_handler.close()
+    with _optional_open(log_file, "w") as log_file_handler:
+        _print_message(msg, verbose, log_file_handler)
 
     return x, fx
 
 
 def solve_tsp_lin_kernighan(
     distance_matrix: np.ndarray,
-    x0: Optional[List[int]] = None,
+    x0: Optional[list[int]] = None,
     log_file: Optional[str] = None,
     verbose: bool = False,
-) -> Tuple[List[int], float]:
+) -> tuple[list[int], float]:
     """
     Solve the Traveling Salesperson Problem using the Lin-Kernighan algorithm.
 
@@ -213,82 +209,80 @@ def solve_tsp_lin_kernighan(
     improvement = True
     tabu = np.zeros(shape=(num_vertices, num_vertices), dtype=int)
 
-    log_file_handler = (
-        open(log_file, "w", encoding="utf-8") if log_file else None
-    )
+    with _optional_open(log_file, "w") as log_file_handler:
+        while improvement:
+            iteration += 1
+            improvement = False
+            successors = _cycle_to_successors(hamiltonian_cycle)
 
-    while improvement:
-        iteration += 1
-        improvement = False
-        successors = _cycle_to_successors(hamiltonian_cycle)
-
-        # Eject edge [a, b] to start the chain and compute the Hamiltonian
-        # path distance obtained by ejecting edge [a, b] from the cycle
-        # as reference.
-        a = int(distance_matrix[vertices, successors].argmax())
-        b = successors[a]
-        hamiltonian_path_distance = (
-            hamiltonian_cycle_distance - distance_matrix[a, b]
-        )
-
-        while True:
-            ejected_edge = a, b
-
-            # Find the edge [c, d] that minimizes the Hamiltonian path obtained
-            # by removing edge [c, d] and adding edge [b, d], with [c, d] not
-            # removed in the current ejection chain.
-            (
-                c,
-                d,
-                hamiltonian_path_distance_found,
-            ) = _minimizes_hamiltonian_path_distance(
-                tabu,
-                iteration,
-                successors,
-                ejected_edge,
-                distance_matrix,
-                hamiltonian_path_distance,
-                hamiltonian_cycle_distance,
+            # Eject edge [a, b] to start the chain and compute the Hamiltonian
+            # path distance obtained by ejecting edge [a, b] from the cycle
+            # as reference.
+            a = int(distance_matrix[vertices, successors].argmax())
+            b = successors[a]
+            hamiltonian_path_distance = (
+                hamiltonian_cycle_distance - distance_matrix[a, b]
             )
 
-            # If the Hamiltonian cycle cannot be improved, return
-            # to the solution and try another ejection.
-            if hamiltonian_path_distance_found >= hamiltonian_cycle_distance:
-                break
+            while True:
+                ejected_edge = a, b
 
-            # Update Hamiltonian path distance reference
-            hamiltonian_path_distance = hamiltonian_path_distance_found
-
-            # Reverse the direction of the path from b to c
-            i, si, successors[b] = b, successors[b], d
-            while i != c:
-                successors[si], i, si = i, si, successors[si]
-
-            # Don't remove again the minimal edge found
-            tabu[c, d] = tabu[d, c] = iteration
-
-            # c plays the role of b in the next iteration
-            b = c
-
-            msg = (
-                f"Current value: {hamiltonian_cycle_distance}; "
-                f"Ejection chain: {iteration}"
-            )
-            _print_message(msg, verbose, log_file_handler)
-
-            # If the Hamiltonian cycle improves, update the solution
-            if (
-                hamiltonian_path_distance + distance_matrix[a, b]
-                < hamiltonian_cycle_distance
-            ):
-                improvement = True
-                successors[a] = b
-                hamiltonian_cycle = _successors_to_cycle(successors)
-                hamiltonian_cycle_distance = (
-                    hamiltonian_path_distance + distance_matrix[a, b]
+                # Find the edge [c, d] that minimizes the Hamiltonian
+                # path obtained by removing edge [c, d] and adding
+                # edge [b, d], with [c, d] not removed in the
+                # current ejection chain.
+                (
+                    c,
+                    d,
+                    hamiltonian_path_distance_found,
+                ) = _minimizes_hamiltonian_path_distance(
+                    tabu,
+                    iteration,
+                    successors,
+                    ejected_edge,
+                    distance_matrix,
+                    hamiltonian_path_distance,
+                    hamiltonian_cycle_distance,
                 )
 
-    if log_file_handler:
-        log_file_handler.close()
+                # If the Hamiltonian cycle cannot be improved, return
+                # to the solution and try another ejection.
+                if (
+                    hamiltonian_path_distance_found
+                    >= hamiltonian_cycle_distance
+                ):
+                    break
+
+                # Update Hamiltonian path distance reference
+                hamiltonian_path_distance = hamiltonian_path_distance_found
+
+                # Reverse the direction of the path from b to c
+                i, si, successors[b] = b, successors[b], d
+                while i != c:
+                    successors[si], i, si = i, si, successors[si]
+
+                # Don't remove again the minimal edge found
+                tabu[c, d] = tabu[d, c] = iteration
+
+                # c plays the role of b in the next iteration
+                b = c
+
+                msg = (
+                    f"Current value: {hamiltonian_cycle_distance}; "
+                    f"Ejection chain: {iteration}"
+                )
+                _print_message(msg, verbose, log_file_handler)
+
+                # If the Hamiltonian cycle improves, update the solution
+                if (
+                    hamiltonian_path_distance + distance_matrix[a, b]
+                    < hamiltonian_cycle_distance
+                ):
+                    improvement = True
+                    successors[a] = b
+                    hamiltonian_cycle = _successors_to_cycle(successors)
+                    hamiltonian_cycle_distance = (
+                        hamiltonian_path_distance + distance_matrix[a, b]
+                    )
 
     return hamiltonian_cycle, hamiltonian_cycle_distance

@@ -1,5 +1,5 @@
 from functools import lru_cache
-from typing import Dict, List, Optional, Tuple
+from typing import Optional
 
 import numpy as np
 
@@ -7,7 +7,7 @@ import numpy as np
 def solve_tsp_dynamic_programming(
     distance_matrix: np.ndarray,
     maxsize: Optional[int] = None,
-) -> Tuple[List, float]:
+) -> tuple[list, float]:
     """
     Solve TSP to optimality with dynamic programming
 
@@ -92,7 +92,7 @@ def solve_tsp_dynamic_programming(
     # Get initial set {1, 2, ..., tsp_size} as a frozenset because @lru_cache
     # requires a hashable type
     N = frozenset(range(1, distance_matrix.shape[0]))
-    memo: Dict[Tuple, int] = {}
+    memo: dict[tuple, int] = {}
 
     # Step 1: get minimum distance
     @lru_cache(maxsize=maxsize)

@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from math import inf
-from typing import List, Tuple
 
 import numpy as np
 
@@ -37,12 +36,12 @@ class Node:
 
     level: int
     index: int
-    path: List[int]
+    path: list[int]
     cost: float
     cost_matrix: np.ndarray
 
     @staticmethod
-    def compute_reduced_matrix(matrix: np.ndarray) -> Tuple[np.ndarray, float]:
+    def compute_reduced_matrix(matrix: np.ndarray) -> tuple[np.ndarray, float]:
         """
         Compute the reduced matrix and the cost of reducing it.
 

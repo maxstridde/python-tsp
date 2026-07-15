@@ -1,10 +1,8 @@
-from typing import List
-
 import numpy as np
 
 
 def compute_permutation_distance(
-    distance_matrix: np.ndarray, permutation: List[int]
+    distance_matrix: np.ndarray, permutation: list[int]
 ) -> float:
     """Compute the total route distance of a given permutation
 
