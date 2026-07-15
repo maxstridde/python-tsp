@@ -12,6 +12,7 @@ Installation
 
   pip install python-tsp
   poetry add python-tsp  # if using Poetry in the project
+  uv add python-tsp  # if using `uv` in the project
 
 
 Quickstart
