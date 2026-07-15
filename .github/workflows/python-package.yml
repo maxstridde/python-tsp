@@ -33,9 +33,9 @@ jobs:
     - name: Check ruff formatter was run
       run: |
         uv run ruff format . --check
-    - name: Check type hints with mypy
+    - name: Check type hints with ty
       run: |
-        uv run mypy --ignore-missing-imports .
+        uv run ty check .
     - name: Run tests and check coverage
       run: |
         # Fail if total coverage is below 95%

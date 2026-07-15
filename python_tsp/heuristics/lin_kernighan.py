@@ -218,7 +218,7 @@ def solve_tsp_lin_kernighan(
             # Eject edge [a, b] to start the chain and compute the Hamiltonian
             # path distance obtained by ejecting edge [a, b] from the cycle
             # as reference.
-            a = int(distance_matrix[vertices, successors].argmax())
+            a = int(distance_matrix[vertices, successors].argmax())  # ty: ignore
             b = successors[a]
             hamiltonian_path_distance = (
                 hamiltonian_cycle_distance - distance_matrix[a, b]

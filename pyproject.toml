@@ -24,7 +24,6 @@ repository = "https://github.com/fillipe-gsm/python-tsp"
 
 [dependency-groups]
 dev = [
-    "mypy>=0.991,<1.0",
     "types-requests>=2.28.11.5,<3.0",
     "types-mock>=4.0.15.2,<5.0",
     "pytest>=7.4.0,<8.0",
@@ -32,6 +31,7 @@ dev = [
     "pytest-cov>=4.1.0,<5.0",
     "mock>=5.1.0,<6.0",
     "ruff>=0.15.21",
+    "ty>=0.0.59",
 ]
 
 [tool.codespell]

@@ -163,8 +163,8 @@ Here are the detailed steps that should be followed before making a pull request
   uv run ruff format .
   uv run ruff check .
 
-  # Mypy for proper type hints
-  uv run mypy --ignore-missing-imports .
+  # Ty for proper type hints
+  uv run ty check .
 
 You can also run all of these steps at once with the check-up bash script:
 

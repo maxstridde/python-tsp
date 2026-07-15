@@ -18,4 +18,4 @@ def process_input(
     sources = np.atleast_2d(sources)
     destinations = np.atleast_2d(destinations)
 
-    return sources, destinations  # type: ignore
+    return sources, destinations
