@@ -1,11 +1,9 @@
 from functools import lru_cache
 from typing import Optional
 
-import numpy as np
-
 
 def solve_tsp_dynamic_programming(
-    distance_matrix: np.ndarray,
+    distance_matrix: list[list[float]],
     maxsize: Optional[int] = None,
 ) -> tuple[list, float]:
     """
@@ -89,20 +87,16 @@ def solve_tsp_dynamic_programming(
     ---------
     https://en.wikipedia.org/wiki/Held%E2%80%93Karp_algorithm#cite_note-5
     """
-    # Get initial set {1, 2, ..., tsp_size} as a frozenset because @lru_cache
-    # requires a hashable type
-    N = frozenset(range(1, distance_matrix.shape[0]))
+    N = frozenset(range(1, len(distance_matrix)))
     memo: dict[tuple, int] = {}
 
-    # Step 1: get minimum distance
     @lru_cache(maxsize=maxsize)
     def dist(ni: int, N: frozenset) -> float:
         if not N:
-            return distance_matrix[ni, 0]
+            return distance_matrix[ni][0]
 
-        # Store the costs in the form (nj, dist(nj, N))
         costs = [
-            (nj, distance_matrix[ni, nj] + dist(nj, N.difference({nj})))
+            (nj, distance_matrix[ni][nj] + dist(nj, N.difference({nj})))
             for nj in N
         ]
         nmin, min_cost = min(costs, key=lambda x: x[1])
@@ -112,8 +106,7 @@ def solve_tsp_dynamic_programming(
 
     best_distance = dist(0, N)
 
-    # Step 2: get path with the minimum distance
-    ni = 0  # start at the origin
+    ni = 0
     solution = [0]
 
     while N:

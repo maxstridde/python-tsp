@@ -1,4 +1,3 @@
-import numpy as np
 import pytest
 
 from python_tsp.distances import euclidean_distance_matrix
@@ -6,51 +5,47 @@ from python_tsp.distances import euclidean_distance_matrix
 
 @pytest.fixture
 def sources():
-    return np.array([[1, -1], [2, -2], [3, -3], [4, -4]])
+    return [[1.0, -1.0], [2.0, -2.0], [3.0, -3.0], [4.0, -4.0]]
 
 
 @pytest.fixture
 def destinations():
-    return np.array([[5, -5], [6, -6], [7, -7]])
+    return [[5.0, -5.0], [6.0, -6.0], [7.0, -7.0]]
 
 
 def test_distance_is_euclidean():
-    """It must return an actual Euclidean distance
-    In this case, it is easy to see that the distance from [1, 1] to [4, 5]
-    is:
-        sqrt((4 - 1)**2 + (5 - 1)**2) = sqrt(3**2 + 4**2) = 5
-    """
-    source = np.array([1, 1])
-    destination = np.array([4, 5])
+    source = [1.0, 1.0]
+    destination = [4.0, 5.0]
 
     distance_matrix = euclidean_distance_matrix(source, destination)
 
-    assert distance_matrix[0] == 5.0
+    assert distance_matrix[0][0] == 5.0
 
 
 def test_all_elements_are_non_negative(sources, destinations):
-    """Being distances, all elements must be non-negative"""
     distance_matrix = euclidean_distance_matrix(sources, destinations)
 
-    assert np.all(distance_matrix >= 0)
+    assert all(v >= 0 for row in distance_matrix for v in row)
 
 
 def test_square_matrix_has_zero_diagonal(sources):
-    """Main diagonal is the distance from a point to itself"""
     distance_matrix = euclidean_distance_matrix(sources)
 
-    assert np.all(np.diag(distance_matrix) == 0)
+    for i in range(len(sources)):
+        assert distance_matrix[i][i] == 0
 
 
 def test_square_matrix_is_symmetric(sources):
     distance_matrix = euclidean_distance_matrix(sources)
-
-    assert np.allclose(distance_matrix, distance_matrix.T)
+    n = len(distance_matrix)
+    for i in range(n):
+        for j in range(n):
+            assert abs(distance_matrix[i][j] - distance_matrix[j][i]) < 1e-10
 
 
 def test_matrix_has_proper_shape(sources, destinations):
-    """N sources and M destinations should produce an (N x M) array"""
     distance_matrix = euclidean_distance_matrix(sources, destinations)
 
-    N, M = sources.shape[0], destinations.shape[0]
-    assert distance_matrix.shape == (N, M)
+    N, M = len(sources), len(destinations)
+    assert len(distance_matrix) == N
+    assert all(len(row) == M for row in distance_matrix)

@@ -1,6 +1,5 @@
 from unittest.mock import MagicMock, patch
 
-import numpy as np
 import pytest
 from requests import Response
 from requests.exceptions import HTTPError
@@ -18,8 +17,8 @@ def mocked_osrm_valid_call():
         mocked_return_value.json = MagicMock(
             return_value={
                 "code": "Ok",
-                "distances": np.array([[0, 50], [50, 0]]),
-                "durations": np.array([[0, 5], [5, 0]]),
+                "distances": [[0, 50], [50, 0]],
+                "durations": [[0, 5], [5, 0]],
             }
         )
         mocked_get.return_value = mocked_return_value
@@ -29,7 +28,6 @@ def mocked_osrm_valid_call():
 
 @pytest.fixture
 def mocked_osrm_invalid_call():
-    """It happens when no service is working or the input is invalid"""
     with patch("python_tsp.distances.osrm_distance.requests.get") as (
         mocked_get
     ):
@@ -42,24 +40,25 @@ def mocked_osrm_invalid_call():
 
 @pytest.mark.usefixtures("mocked_osrm_valid_call")
 def test_osrm_distance_valid_call():
-    sources = np.array([[0.0, 0.0], [1.0, 1.0]])
+    sources = [[0.0, 0.0], [1.0, 1.0]]
 
     cost_matrix = osrm_distance_matrix(sources, sources)
 
-    num_sources = sources.shape[0]
-    assert cost_matrix.shape == (num_sources, num_sources)
+    num_sources = len(sources)
+    assert len(cost_matrix) == num_sources
+    assert all(len(row) == num_sources for row in cost_matrix)
 
 
 @pytest.mark.usefixtures("mocked_osrm_invalid_call")
 def test_osrm_distance_invalid_call():
-    sources = np.array([[0.0, 0.0], [1.0, 1.0]])
+    sources = [[0.0, 0.0], [1.0, 1.0]]
 
     with pytest.raises(HTTPError):
         osrm_distance_matrix(sources, sources)
 
 
 def test_osrm_distance_call_square_matrix(mocked_osrm_valid_call):
-    sources = np.array([[0.0, 0.0], [1.0, 1.0]])
+    sources = [[0.0, 0.0], [1.0, 1.0]]
     osrm_server_address = "BASE_URL"
 
     osrm_distance_matrix(
@@ -78,8 +77,8 @@ def test_osrm_distance_call_square_matrix(mocked_osrm_valid_call):
 
 
 def test_osrm_distance_call_nonsquare_matrix(mocked_osrm_valid_call):
-    sources = np.array([[0.0, 0.0], [1.0, 1.0]])
-    destinations = np.array([[2.0, 2.0], [3.0, 3.0]])
+    sources = [[0.0, 0.0], [1.0, 1.0]]
+    destinations = [[2.0, 2.0], [3.0, 3.0]]
     osrm_server_address = "BASE_URL"
 
     osrm_distance_matrix(
@@ -99,8 +98,7 @@ def test_osrm_distance_call_nonsquare_matrix(mocked_osrm_valid_call):
 
 
 def test_osrm_distance_call_durations_cost(mocked_osrm_valid_call):
-    """Check if the URL is changed when the cost type is different"""
-    sources = np.array([[0.0, 0.0], [1.0, 1.0]])
+    sources = [[0.0, 0.0], [1.0, 1.0]]
     osrm_server_address = "BASE_URL"
 
     osrm_distance_matrix(

@@ -1,4 +1,3 @@
-import numpy as np
 import pytest
 
 from python_tsp.heuristics import solve_tsp_lin_kernighan
@@ -20,11 +19,6 @@ from tests.data import (
     "distance_matrix", [distance_matrix1, distance_matrix2, distance_matrix3]
 )
 def test_lin_kernighan_solution_is_valid(distance_matrix):
-    """
-    It is not possible to determine the returned solution, so this function
-    just checks if it is valid: it has all nodes and begins at the root 0.
-    """
-
     x, _ = solve_tsp_lin_kernighan(distance_matrix)
 
     assert set(x) == set(range(5))
@@ -35,10 +29,6 @@ def test_lin_kernighan_solution_is_valid(distance_matrix):
     "distance_matrix", [distance_matrix1, distance_matrix2, distance_matrix3]
 )
 def test_lin_kernighan_returns_better_neighbor(distance_matrix):
-    """
-    If there is room for improvement, a better neighbor is returned.
-    Here, we choose purposely a permutation that can be improved.
-    """
     x0 = [0, 4, 2, 3, 1]
     fx = compute_permutation_distance(
         distance_matrix=distance_matrix, permutation=x0
@@ -60,10 +50,6 @@ def test_lin_kernighan_returns_better_neighbor(distance_matrix):
 def test_lin_kernighan_returns_equal_optimal_solution(
     distance_matrix, optimal_permutation, optimal_distance
 ):
-    """
-    If there is no room for improvement, the same solution is returned.
-    Here, we choose purposely the optimal solution of each problem
-    """
     xopt, fopt = solve_tsp_lin_kernighan(
         distance_matrix=distance_matrix, x0=optimal_permutation
     )
@@ -73,10 +59,6 @@ def test_lin_kernighan_returns_equal_optimal_solution(
 
 
 def test_lin_kernighan_log_file_is_created_if_required(tmp_path):
-    """
-    If a log_file is provided, it contains information about the execution.
-    """
-
     log_file = tmp_path / "tmp_log_file.log"
 
     solve_tsp_lin_kernighan(distance_matrix1, log_file=log_file, verbose=True)
@@ -88,12 +70,11 @@ def test_lin_kernighan_log_file_is_created_if_required(tmp_path):
 @pytest.mark.parametrize(
     "distance_matrix, xopt, fopt",
     [
-        (np.array([[0, 5], [1, 0]]), [0, 1], 6),
-        (np.array([[0, 1], [1, 0]]), [0, 1], 2),
+        ([[0, 5], [1, 0]], [0, 1], 6),
+        ([[0, 1], [1, 0]], [0, 1], 2),
     ],
 )
 def test_lin_kernighan_handles_few_node_problems(distance_matrix, xopt, fopt):
-    """It should handle problems with less than 4 nodes."""
     x, fx = solve_tsp_lin_kernighan(distance_matrix=distance_matrix)
 
     assert x == xopt

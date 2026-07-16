@@ -1,25 +1,24 @@
 from math import ceil
 from typing import Optional
 
-import numpy as np
 import requests
 
 from .data_processing import process_input
 
 
 def osrm_distance_matrix(
-    sources: np.ndarray,
-    destinations: Optional[np.ndarray] = None,
+    sources: list[list[float]] | list[float],
+    destinations: Optional[list[list[float]] | list[float]] = None,
     osrm_server_address: str = "http://localhost:5000",
     osrm_batch_size: int = 500,
     cost_type: str = "distances",
-) -> np.ndarray:
+) -> list[list[float]]:
     """Compute distance matrix from sources to destinations using OSRM service
 
     Parameters
     ----------
     sources, destinations
-        2D Arrays of coordinates in the form [lat, lng] for each row
+        2D lists of coordinates in the form [lat, lng] for each row
         Also, if ``destinations`` is `None`, compute the distance between each
         source in ``sources``.
 
@@ -41,9 +40,9 @@ def osrm_distance_matrix(
     """
     sources, destinations = process_input(sources, destinations)
 
-    num_sources = sources.shape[0]
-    num_destinations = destinations.shape[0]
-    cost_matrix = np.zeros((num_sources, num_destinations))
+    num_sources = len(sources)
+    num_destinations = len(destinations)
+    cost_matrix = [[0.0] * num_destinations for _ in range(num_sources)]
 
     num_batches_i = ceil(num_sources / osrm_batch_size)
     num_batches_j = ceil(num_destinations / osrm_batch_size)
@@ -58,79 +57,51 @@ def osrm_distance_matrix(
             sources_batch = sources[start_i:end_i]
             destinations_batch = destinations[start_j:end_j]
 
-            cost_matrix[start_i:end_i, start_j:end_j] = (
-                _get_batch_osrm_distance(
-                    sources_batch,
-                    destinations_batch,
-                    osrm_server_address,
-                    cost_type=cost_type,
-                )
+            batch_result = _get_batch_osrm_distance(
+                sources_batch,
+                destinations_batch,
+                osrm_server_address,
+                cost_type=cost_type,
             )
+
+            for ii in range(len(sources_batch)):
+                for jj in range(len(destinations_batch)):
+                    cost_matrix[start_i + ii][start_j + jj] = batch_result[ii][
+                        jj
+                    ]
 
     return cost_matrix
 
 
 def _get_batch_osrm_distance(
-    sources_batch: np.ndarray,
-    destinations_batch: np.ndarray,
+    sources_batch: list[list[float]],
+    destinations_batch: list[list[float]],
     osrm_server_address: str,
     cost_type: str,
-):
-    """Request the OSRM distance matrix for a given batch"""
+) -> list[list[float]]:
     url = _format_osrm_url(
         sources_batch, destinations_batch, osrm_server_address, cost_type
     )
     resp = requests.get(url)
     resp.raise_for_status()
-
-    return np.array(resp.json()[cost_type])
+    return resp.json()[cost_type]
 
 
 def _format_osrm_url(
-    sources_batch: np.ndarray,
-    destinations_batch: np.ndarray,
+    sources_batch: list[list[float]],
+    destinations_batch: list[list[float]],
     osrm_server_address: str,
     cost_type: str,
 ) -> str:
-    """Format OSRM url string with sources and destinations
-
-    Notes
-    -----
-    Consider the N sources in the form
-        (lat_src1, lgn_src1), (lat_src2, lgn_src2), ...
-
-    and the M destinations in the form
-        (lat_dest1, lgn_dest1), (lat_dest2, lgn_dest2), ...
-
-    This function converts these properties in a URL of the form
-        {OSRM_SERVER_ADDRESS}/table/v1/driving/
-        lng_src1,lat_src1;lng_src2,lat_src2;...;lng_srcN,lat_srcN;
-        lng_dest1,lat_dest1;lng_dest2,lat_dest2;...;lng_destM,lng_destM
-        ?sources=0;1;...;N-1
-        &destinations=N;N+1;...;N+M-1
-        &annotations=distance
-
-    In the simpler case when sources == destinations, the URL is simplified to
-        {OSRM_SERVER_ADDRESS}/table/v1/driving/
-        lng_src1,lat_src1;lng_src2,lat_src2;...;lng_srcN,lat_srcN
-        ?annotations=distance
-
-    Obs: Replace "distance" with "duration" if a time matrix is required
-    Obs2: The matrix type follows the singular form in the URL (e.g.,
-    "distance"), but the returned JSON follows the plural form (e.g.,
-    "distances"). Thus, we ignore the last letter of the input type
-    """
     url_cost_type = cost_type[:-1]
 
     sources_coord = ";".join(
         f"{source[1]},{source[0]}" for source in sources_batch
     )
 
-    # If sources == destinations, return a simpler URL early. Notice it needs
-    # at least two points, otherwise OSRM complains
     if (
-        np.array_equal(sources_batch, destinations_batch)
-        and sources_batch.shape[0] > 1
+        _array_equal(sources_batch, destinations_batch)
+        and len(sources_batch) > 1
     ):
         return (
             f"{osrm_server_address}/table/v1/driving/"
@@ -144,10 +115,8 @@ def _format_osrm_url(
     )
     locations_coord = sources_coord + ";" + destinations_coord
 
-    # Get indices of sources and destinations in the form
-    # sources = 0,1,...,N' and destinations = N'+1,N'+2...N'+M'
-    num_sources = sources_batch.shape[0]
-    num_destinations = destinations_batch.shape[0]
+    num_sources = len(sources_batch)
+    num_destinations = len(destinations_batch)
 
     sources_indices = ";".join(str(index) for index in range(num_sources))
     destinations_indices = ";".join(
@@ -160,4 +129,13 @@ def _format_osrm_url(
         f"{locations_coord}"
         f"?sources={sources_indices}&destinations={destinations_indices}"
         f"&annotations={url_cost_type}"
+    )
+
+
+def _array_equal(a: list[list[float]], b: list[list[float]]) -> bool:
+    if len(a) != len(b):
+        return False
+    return all(
+        len(row_a) == len(row_b) and all(x == y for x, y in zip(row_a, row_b))
+        for row_a, row_b in zip(a, b)
     )

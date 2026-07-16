@@ -3,8 +3,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 from math import inf
 
-import numpy as np
-
 
 @dataclass
 class Node:
@@ -38,10 +36,12 @@ class Node:
     index: int
     path: list[int]
     cost: float
-    cost_matrix: np.ndarray
+    cost_matrix: list[list[float]]
 
     @staticmethod
-    def compute_reduced_matrix(matrix: np.ndarray) -> tuple[np.ndarray, float]:
+    def compute_reduced_matrix(
+        matrix: list[list[float]],
+    ) -> tuple[list[list[float]], float]:
         """
         Compute the reduced matrix and the cost of reducing it.
 
@@ -56,27 +56,30 @@ class Node:
             A tuple containing the reduced matrix and the total
             cost of reductions.
         """
-        mask = matrix != inf
-        reduced_matrix = np.copy(matrix)
+        n = len(matrix)
+        reduced = [row[:] for row in matrix]
+        total_reduction = 0.0
 
-        min_rows = np.min(reduced_matrix, axis=1, keepdims=True)
-        min_rows[min_rows == inf] = 0
-        if np.any(min_rows != 0):
-            reduced_matrix = np.where(
-                mask, reduced_matrix - min_rows, reduced_matrix
-            )
+        min_rows = [min(row) for row in reduced]
+        for i in range(n):
+            if min_rows[i] != inf and min_rows[i] != 0:
+                for j in range(n):
+                    if reduced[i][j] != inf:
+                        reduced[i][j] -= min_rows[i]
+                total_reduction += min_rows[i]
 
-        min_cols = np.min(reduced_matrix, axis=0, keepdims=True)
-        min_cols[min_cols == inf] = 0
-        if np.any(min_cols != 0):
-            reduced_matrix = np.where(
-                mask, reduced_matrix - min_cols, reduced_matrix
-            )
+        min_cols = [min(reduced[i][j] for i in range(n)) for j in range(n)]
+        for j in range(n):
+            if min_cols[j] != inf and min_cols[j] != 0:
+                for i in range(n):
+                    if reduced[i][j] != inf:
+                        reduced[i][j] -= min_cols[j]
+                total_reduction += min_cols[j]
 
-        return reduced_matrix, np.sum(min_rows) + np.sum(min_cols)
+        return reduced, total_reduction
 
     @classmethod
-    def from_cost_matrix(cls, cost_matrix: np.ndarray) -> Node:
+    def from_cost_matrix(cls, cost_matrix: list[list[float]]) -> Node:
         """
         Create a Node object from a given cost matrix.
 
@@ -116,9 +119,11 @@ class Node:
         Node
             A new Node object with the updated path and cost.
         """
-        matrix = np.copy(parent.cost_matrix)
-        matrix[parent.index, :] = inf
-        matrix[:, index] = inf
+        matrix = [row[:] for row in parent.cost_matrix]
+        n = len(matrix)
+        matrix[parent.index] = [inf] * n
+        for i in range(n):
+            matrix[i][index] = inf
         matrix[index][0] = inf
         _cost_matrix, _cost = cls.compute_reduced_matrix(matrix=matrix)
         return cls(

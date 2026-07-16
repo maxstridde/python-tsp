@@ -37,6 +37,6 @@ def test_setup_return_random_valid_solution(distance_matrix):
 
     x, fx = setup_initial_solution(distance_matrix)
 
-    assert set(x) == set(range(distance_matrix.shape[0]))
+    assert set(x) == set(range(len(distance_matrix)))
     assert x[0] == 0
     assert fx
