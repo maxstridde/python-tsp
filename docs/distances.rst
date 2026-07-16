@@ -11,16 +11,14 @@ Computes the regular Euclidean distance between points.
 
 .. code:: python
 
-    import numpy as np
-
     from python_tsp.distances import euclidean_distance_matrix
 
 
-    sources = np.array([[0, 0], [1, 1]])
-    destinations = np.array([[2, 2], [3, 3], [4, 4]])
+    sources = [[0, 0], [1, 1]]
+    destinations = [[2, 2], [3, 3], [4, 4]]
 
     distance_matrix = euclidean_distance_matrix(sources, destinations)
-    # outputs a 2 x 3 numpy array
+    # outputs a 2 x 3 matrix (list of lists)
 
 
 The returned distance matrix has in the ``i``-th row the distance from the ``i``-th source to each destination. This API is similar to all distance functions here.
@@ -33,7 +31,7 @@ Notice that, in general, the distance matrix is non-square. While this is by des
     # same as
     # distance_matrix = euclidean_distance_matrix(sources, sources)
 
-If your problem requires a matrix of integers, just manipulate it like any Numpy array; e.g., ``distance_matrix.astype(int)``.
+If your problem requires a matrix of integers, just convert the values; e.g., ``[[int(v) for v in row] for row in distance_matrix]``.
 
 
 Great Circle Distance
@@ -41,21 +39,19 @@ Great Circle Distance
 
 In case the nodes represent coordinates in a sphere (such as the planet Earth), a more appropriate distance can be the `Great Circle Distance <https://en.wikipedia.org/wiki/Great-circle_distance>`_.
 
-For example, if you have an array where each row has the latitude and longitude of a point,
+For example, if you have a list where each row has the latitude and longitude of a point,
 
 .. code:: python
-
-   import numpy as np
 
    from python_tsp.distances import great_circle_distance_matrix
 
 
-   sources = np.array([
+   sources = [
        [ 40.73024833, -73.79440675],  # latitude, longitude
        [ 41.47362495, -73.92783272],
        [ 41.26591   , -73.21026228],
        [ 41.3249908 , -73.507788  ]
-   ])
+   ]
    distance_matrix = great_circle_distance_matrix(sources)
 
 
@@ -70,17 +66,15 @@ Again in case you have coordinates but would like to take a city's geography int
 
 .. code:: python
 
-   import numpy as np
-
    from python_tsp.distances import osrm_distance_matrix
 
 
-   sources = np.array([
+   sources = [
        [ 40.73024833, -73.79440675],  # latitude, longitude
        [ 41.47362495, -73.92783272],
        [ 41.26591   , -73.21026228],
        [ 41.3249908 , -73.507788  ]
-   ])
+   ]
    distance_matrix = osrm_distance_matrix(
        sources, osrm_server_address="http://localhost:5000"
    )
@@ -127,14 +121,14 @@ Finally, remember you can also compute the distance between different sources an
 
 .. code:: python
 
-    sources = np.array([
+    sources = [
        [ 40.73024833, -73.79440675],  # latitude, longitude
        [ 41.47362495, -73.92783272],
        [ 41.26591   , -73.21026228],
-    ])
-    destinations = np.array([
+    ]
+    destinations = [
        [ 41.3249908 , -73.507788  ]
-    ])
+    ]
 
     distance_matrix = osrm_distance_matrix(
        sources,
@@ -164,4 +158,4 @@ Finally, this module also has support for many TSPLIB-type files of ``TSP`` and 
 
     tsplib_file = "tests/tsplib_data/br17.atsp"  # replace with the path to your TSPLIB file
     distance_matrix = tsplib_distance_matrix(tsplib_file)
-    # outputs a 17 x 17 array
+    # outputs a 17 x 17 matrix (list of lists)
