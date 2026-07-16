@@ -1,8 +1,6 @@
 from random import randint
 from typing import Optional, TextIO
 
-import numpy as np
-
 from python_tsp.heuristics import solve_tsp_lin_kernighan
 from python_tsp.utils import _optional_open, setup_initial_solution
 
@@ -18,7 +16,7 @@ def _print_message(
 
 
 def solve_tsp_record_to_record(
-    distance_matrix: np.ndarray,
+    distance_matrix: list[list[float]],
     x0: Optional[list[int]] = None,
     max_iterations: Optional[int] = None,
     log_file: Optional[str] = None,
@@ -58,7 +56,7 @@ def solve_tsp_record_to_record(
     Éric D. Taillard, "Design of Heuristic Algorithms for Hard Optimization,"
     Chapter 7, Problems of Chapter 7, 7.4 Record to Record, Springer, 2023.
     """
-    n = distance_matrix.shape[0]
+    n = len(distance_matrix)
     max_iterations = max_iterations or n
     x, fx = setup_initial_solution(distance_matrix=distance_matrix, x0=x0)
 

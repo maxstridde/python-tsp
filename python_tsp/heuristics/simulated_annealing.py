@@ -1,8 +1,8 @@
+import math
+import random
 from math import inf
 from timeit import default_timer
 from typing import Optional, TextIO
-
-import numpy as np
 
 from python_tsp.heuristics.perturbation_schemes import neighborhood_gen
 from python_tsp.utils import (
@@ -17,7 +17,7 @@ MAX_INNER_ITERATIONS_MULTIPLIER = 10
 
 
 def solve_tsp_simulated_annealing(
-    distance_matrix: np.ndarray,
+    distance_matrix: list[list[float]],
     x0: Optional[list[int]] = None,
     perturbation_scheme: str = "two_opt",
     alpha: float = 0.9,
@@ -74,16 +74,17 @@ def solve_tsp_simulated_annealing(
     x, fx = setup_initial_solution(distance_matrix, x0)
     temp = _initial_temperature(distance_matrix, x, fx, perturbation_scheme)
     max_processing_time = max_processing_time or inf
+
     with _optional_open(log_file, "w") as log_file_handler:
         n = len(x)
         k_inner_min = n
         k_inner_max = MAX_INNER_ITERATIONS_MULTIPLIER * n
-        k_noimprovements = 0  # number of inner loops without improvement
+        k_noimprovements = 0
 
         tic = default_timer()
         stop_early = False
         while (k_noimprovements < MAX_NON_IMPROVEMENTS) and (not stop_early):
-            k_accepted = 0  # number of accepted perturbations
+            k_accepted = 0
             for k in range(k_inner_max):
                 if default_timer() - tic > max_processing_time:
                     _print_message(TIME_LIMIT_MSG, verbose, log_file_handler)
@@ -109,7 +110,7 @@ def solve_tsp_simulated_annealing(
                 if k_accepted >= k_inner_min:
                     break
 
-            temp *= alpha  # temperature update
+            temp *= alpha
             k_noimprovements += k_accepted == 0
 
     return x, fx
@@ -126,7 +127,7 @@ def _print_message(
 
 
 def _initial_temperature(
-    distance_matrix: np.ndarray,
+    distance_matrix: list[list[float]],
     x: list[int],
     fx: float,
     perturbation_scheme: str,
@@ -150,18 +151,16 @@ def _initial_temperature(
     case studies. Springer Science & Business Media, 2006.
     """
 
-    # Step 1
     dfx_list = []
     for _ in range(100):
         xn = _perturbation(x, perturbation_scheme)
         fn = compute_permutation_distance(distance_matrix, xn)
         dfx_list.append(fn - fx)
 
-    dfx_mean = np.abs(np.mean(dfx_list))
+    dfx_mean = abs(sum(dfx_list) / len(dfx_list))
 
-    # Step 2
     tau0 = 0.5
-    return -dfx_mean / np.log(tau0)
+    return -dfx_mean / math.log(tau0)
 
 
 def _perturbation(x: list[int], perturbation_scheme: str):
@@ -178,5 +177,5 @@ def _acceptance_rule(fx: float, fn: float, temp: float) -> bool:
 
     dfx = fn - fx
     return (dfx < 0) or (
-        (dfx > 0) and (np.random.rand() <= np.exp(-(fn - fx) / temp))
+        (dfx > 0) and (random.random() <= math.exp(-(fn - fx) / temp))
     )

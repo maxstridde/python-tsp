@@ -1,7 +1,7 @@
+import random
 import sys
 from io import StringIO
 
-import numpy as np
 import pytest
 
 from python_tsp.heuristics import simulated_annealing
@@ -27,11 +27,6 @@ def permutation():
 def test_simulated_annealing_solution_is_valid(
     permutation, distance_matrix, scheme
 ):
-    """
-    It is not possible to determine the returned solution, so this function
-    just checks if it is valid: it has all nodes and begins at the root 0.
-    """
-
     x, _ = simulated_annealing.solve_tsp_simulated_annealing(
         distance_matrix, perturbation_scheme=scheme
     )
@@ -42,21 +37,13 @@ def test_simulated_annealing_solution_is_valid(
 
 @pytest.mark.parametrize("scheme", PERTURBATION_SCHEMES)
 def test_simulated_annealing_with_time_constraints(permutation, scheme):
-    """
-    Just like in the local search test, the actual time execution tends to
-    respect the provided limits, but it seems to vary a bit between
-    platforms. For instance, locally it may take a few milisseconds more,
-    but on Github it may be a few whole seconds.
-    Thus, this test checks if a proper warning is printed if the time
-    constraint stopped execution early.
-    """
+    max_processing_time = 1
+    random.seed(1)
+    n = 500
+    distance_matrix = [[random.random() for _ in range(n)] for _ in range(n)]
 
-    max_processing_time = 1  # 1 second
-    np.random.seed(1)  # for repeatability with the same distance matrix
-    distance_matrix = np.random.rand(5000, 5000)  # very large matrix
-
-    captured_output = StringIO()  # Create StringIO object
-    sys.stdout = captured_output  # and redirect stdout.
+    captured_output = StringIO()
+    sys.stdout = captured_output
 
     simulated_annealing.solve_tsp_simulated_annealing(
         distance_matrix,
@@ -69,10 +56,6 @@ def test_simulated_annealing_with_time_constraints(permutation, scheme):
 
 
 def test_log_file_is_created_if_required(permutation, tmp_path):
-    """
-    If a log_file is provided, it contains information about the execution.
-    """
-
     log_file = tmp_path / "tmp_log_file.log"
 
     simulated_annealing.solve_tsp_simulated_annealing(

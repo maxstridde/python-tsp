@@ -17,20 +17,19 @@ Installation
 Examples
 ========
 
-Given a distance matrix as a numpy array, it is easy to compute a Hamiltonian
+Given a distance matrix as a list of lists, it is easy to compute a Hamiltonian
 path with least cost. For instance, to use a Dynamic Programming method:
 
 .. code:: python
 
-   import numpy as np
    from python_tsp.exact import solve_tsp_dynamic_programming
 
-   distance_matrix = np.array([
+   distance_matrix = [
        [0,  5, 4, 10],
        [5,  0, 8,  5],
        [4,  8, 0,  3],
        [10, 5, 3,  0]
-   ])
+   ]
    permutation, distance = solve_tsp_dynamic_programming(distance_matrix)
 
 The solution will be ``[0, 1, 3, 2]``, with total distance 17. Notice it is
@@ -54,7 +53,8 @@ zero:
 
 .. code:: python
 
-   distance_matrix[:, 0] = 0
+   for row in distance_matrix:
+       row[0] = 0
    permutation, distance = solve_tsp_dynamic_programming(distance_matrix)
 
 and in this case we obtain ``[0, 2, 3, 1]``, with distance 12. Notice that in
@@ -71,15 +71,14 @@ of a point,
 
 .. code:: python
 
-   import numpy as np
    from python_tsp.distances import great_circle_distance_matrix
 
-   sources = np.array([
+   sources = [
        [ 40.73024833, -73.79440675],
        [ 41.47362495, -73.92783272],
        [ 41.26591   , -73.21026228],
        [ 41.3249908 , -73.507788  ]
-   ])
+   ]
    distance_matrix = great_circle_distance_matrix(sources)
 
 See the `project's repository <https://github.com/fillipe-gsm/python-tsp>`_

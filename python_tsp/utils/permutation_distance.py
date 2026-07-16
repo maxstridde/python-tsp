@@ -1,8 +1,5 @@
-import numpy as np
-
-
 def compute_permutation_distance(
-    distance_matrix: np.ndarray, permutation: list[int]
+    distance_matrix: list[list[float]], permutation: list[int]
 ) -> float:
     """Compute the total route distance of a given permutation
 
@@ -35,4 +32,4 @@ def compute_permutation_distance(
     """
     ind1 = permutation
     ind2 = permutation[1:] + permutation[:1]
-    return distance_matrix[ind1, ind2].sum()
+    return sum(distance_matrix[i][j] for i, j in zip(ind1, ind2))

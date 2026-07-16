@@ -4,7 +4,7 @@ Solvers
 
 This library has currently two classes of solvers: exact solvers and heuristics.
 
-All solvers require at least a ``distance_matrix`` as input, which is an ``n x n`` numpy array containing the distance matrix for a problem with ``n`` nodes. This matrix can contain integers or floats and does not need to be symmetric. Other properties specific to each solver will be detailed below.
+All solvers require at least a ``distance_matrix`` as input, which is an ``n x n`` matrix (list of lists) containing the distance matrix for a problem with ``n`` nodes. This matrix can contain integers or floats and does not need to be symmetric. Other properties specific to each solver will be detailed below.
 
 All of them also return a permutation of integers from ``0`` to ``n`` containing the best route found, plus a number indicating the route cost.
 
@@ -87,7 +87,7 @@ Notice this local optimum may be different for distinct perturbation schemes and
   from python_tsp.heuristics import solve_tsp_local_search
 
   xopt, fopt = solve_tsp_local_search(
-      distance_matrix: np.ndarray,
+      distance_matrix: list[list[float]],
       x0: Optional[List[int]] = None,
       perturbation_scheme: str = "two_opt",
       max_processing_time: Optional[float] = None,
@@ -133,7 +133,7 @@ An implementation of the `Simulated Annealing <https://en.wikipedia.org/wiki/Sim
   
 
   xopt, fopt = solve_tsp_simulated_annealing(
-      distance_matrix: np.ndarray,
+      distance_matrix: list[list[float]],
       x0: Optional[List[int]] = None,
       perturbation_scheme: str = "two_opt",
       alpha: float = 0.9,
@@ -192,7 +192,7 @@ A basic Lin and Kernighan implementation is provided. It can be said that the qu
 
 
     xopt, fopt = solve_tsp_lin_kernighan(
-        distance_matrix: np.ndarray,
+        distance_matrix: list[list[float]],
         x0: Optional[List[int]] = None,
         log_file: Optional[str] = None,
         verbose: bool = False,
@@ -230,7 +230,7 @@ Depending on the ``max_iterations`` parameter set, very high quality solutions c
 
 
     xopt, fopt = solve_tsp_record_to_record(
-        distance_matrix: np.ndarray,
+        distance_matrix: list[list[float]],
         x0: Optional[List[int]] = None,
         max_iterations: Optional[int] = None,
         log_file: Optional[str] = None,

@@ -1,9 +1,5 @@
-"""Simple local search solver"""
-
 from timeit import default_timer
 from typing import Optional, TextIO
-
-import numpy as np
 
 from python_tsp.heuristics.perturbation_schemes import neighborhood_gen
 from python_tsp.utils import (
@@ -16,7 +12,7 @@ TIME_LIMIT_MSG = "WARNING: Stopping early due to time constraints"
 
 
 def solve_tsp_local_search(
-    distance_matrix: np.ndarray,
+    distance_matrix: list[list[float]],
     x0: Optional[list[int]] = None,
     perturbation_scheme: str = "two_opt",
     max_processing_time: Optional[float] = None,
@@ -67,7 +63,7 @@ def solve_tsp_local_search(
         improvement. Return `x`, `fx` as solution.
     """
     x, fx = setup_initial_solution(distance_matrix, x0)
-    max_processing_time = max_processing_time or np.inf
+    max_processing_time = max_processing_time or float("inf")
 
     with _optional_open(log_file, "w") as log_file_handler:
         tic = default_timer()
@@ -92,7 +88,7 @@ def solve_tsp_local_search(
                 if fn < fx:
                     improvement = True
                     x, fx = xn, fn
-                    break  # early stop due to first improvement local search
+                    break
 
     return x, fx
 

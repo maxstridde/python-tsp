@@ -1,12 +1,10 @@
 from math import inf
 
-import numpy as np
-
 from python_tsp.exact.branch_and_bound import Node, PriorityQueue
 
 
 def solve_tsp_branch_and_bound(
-    distance_matrix: np.ndarray,
+    distance_matrix: list[list[float]],
 ) -> tuple[list[int], float]:
     """
     Solve the Traveling Salesperson Problem (TSP) using the
@@ -46,8 +44,9 @@ def solve_tsp_branch_and_bound(
            W. H. Freeman and Company.
     """
     num_cities = len(distance_matrix)
-    cost_matrix = np.copy(distance_matrix).astype(float)
-    np.fill_diagonal(cost_matrix, inf)
+    cost_matrix = [[float(v) for v in row] for row in distance_matrix]
+    for i in range(num_cities):
+        cost_matrix[i][i] = inf
 
     root = Node.from_cost_matrix(cost_matrix=cost_matrix)
     pq = PriorityQueue([root])

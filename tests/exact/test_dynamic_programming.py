@@ -22,7 +22,7 @@ def test_solution_has_all_nodes(distance_matrix):
 
     permutation, _ = solve_tsp_dynamic_programming(distance_matrix)
 
-    num_nodes = distance_matrix.shape[0]
+    num_nodes = len(distance_matrix)
     assert len(permutation) == num_nodes
     assert set(permutation) == set(range(num_nodes))
 
