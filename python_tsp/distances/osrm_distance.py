@@ -1,5 +1,6 @@
+from __future__ import annotations
+
 from math import ceil
-from typing import Optional
 
 import requests
 
@@ -8,7 +9,7 @@ from .data_processing import process_input
 
 def osrm_distance_matrix(
     sources: list[list[float]] | list[float],
-    destinations: Optional[list[list[float]] | list[float]] = None,
+    destinations: list[list[float]] | list[float] | None = None,
     osrm_server_address: str = "http://localhost:5000",
     osrm_batch_size: int = 500,
     cost_type: str = "distances",

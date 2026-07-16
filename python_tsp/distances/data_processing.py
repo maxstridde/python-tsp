@@ -1,9 +1,9 @@
-from typing import Optional
+from __future__ import annotations
 
 
 def process_input(
     sources: list[list[float]] | list[float],
-    destinations: Optional[list[list[float]] | list[float]] = None,
+    destinations: list[list[float]] | list[float] | None = None,
 ) -> tuple[list[list[float]], list[list[float]]]:
     """Pre-process input
     This function ensures ``sources`` and ``destinations`` are two-dimensional

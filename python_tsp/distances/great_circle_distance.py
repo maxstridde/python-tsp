@@ -1,5 +1,6 @@
+from __future__ import annotations
+
 import math
-from typing import Optional
 
 from .data_processing import process_input
 
@@ -34,7 +35,7 @@ def _great_circle_distance(src: list[float], dst: list[float]) -> float:
 
 def great_circle_distance_matrix(
     sources: list[list[float]] | list[float],
-    destinations: Optional[list[list[float]] | list[float]] = None,
+    destinations: list[list[float]] | list[float] | None = None,
 ) -> list[list[float]]:
     """Distance matrix using the Great Circle distance
     This is an Euclidean-like distance but on spheres [1]. In this case it is

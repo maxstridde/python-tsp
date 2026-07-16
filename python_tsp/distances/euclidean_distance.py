@@ -1,12 +1,13 @@
+from __future__ import annotations
+
 import math
-from typing import Optional
 
 from .data_processing import process_input
 
 
 def euclidean_distance_matrix(
     sources: list[list[float]] | list[float],
-    destinations: Optional[list[list[float]] | list[float]] = None,
+    destinations: list[list[float]] | list[float] | None = None,
 ) -> list[list[float]]:
     """Distance matrix using the Euclidean distance
 
